@@ -37,6 +37,7 @@ index.use("/api/user", userRouter);
 index.use("/api/message", messageRouter);
 
 const userSocketMap = {};
+const userAudioMap = {};
 
 io.on("connection", async (socket) => {
   const clientId = socket.handshake.query.id;
@@ -60,6 +61,7 @@ io.on("connection", async (socket) => {
       // );
 
       const receiverSocketId = userSocketMap[receiverId];
+      console.log([userSocketMap[clientId], receiverSocketId]);
 
       if (userSocketMap[clientId]) {
         io.to([userSocketMap[clientId], receiverSocketId]).emit(
@@ -82,6 +84,50 @@ io.on("connection", async (socket) => {
       // });
     }
   );
+
+  socket.on("joinGroup", (groupId) => {
+    socket.join(groupId);
+  });
+
+  socket.on("send", async ({ groupId, senderId, message, name }) => {
+    // Save the message to the database
+    console.log(message);
+    // Emit the message to all group members
+    io.to(groupId).emit("newMessage", {
+      senderId,
+      message,
+      groupId,
+      name,
+    });
+  });
+
+  socket.on("joinaudiocall", ({ userId }) => {
+    userAudioMap[userId] = socket.id;
+  });
+
+  socket.on("offer", (data) => {
+    const { offer, to } = data;
+    console.log(data);
+    if (userAudioMap[to]) {
+      io.to(userAudioMap[to]).emit("offer", { offer, from: socket.id });
+    }
+  });
+
+  // Handle answers
+  socket.on("answer", (data) => {
+    const { answer, to } = data;
+    if (userAudioMap[to]) {
+      io.to(userAudioMap[to]).emit("answer", { answer, from: socket.id });
+    }
+  });
+
+  // Handle ICE candidates
+  socket.on("candidate", (data) => {
+    const { candidate, to } = data;
+    if (userAudioMap[to]) {
+      io.to(userAudioMap[to]).emit("candidate", { candidate, from: socket.id });
+    }
+  });
 
   socket.on("disconnect", () => {
     delete userSocketMap[clientId];
