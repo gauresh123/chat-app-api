@@ -43,47 +43,41 @@ io.on("connection", async (socket) => {
   const clientId = socket.handshake.query.id;
   userSocketMap[clientId] = socket.id;
 
-  socket.on(
-    "sendMessage",
-    async ({ senderId, receiverId, message, socketId }) => {
-      // console.log(senderId, receiverId, message);
+  socket.on("sendMessage", async ({ senderid, receiverid, message }) => {
+    const timestamp = new Date();
+    // await sequelize.query(
+    //   "select * from public.insert_message(:senderId,:receiverId,:message)",
+    //   {
+    //     replacements: {
+    //       senderId: senderid,
+    //       receiverId: receiverid,
+    //       message: message,
+    //     },
+    //   }
+    // );
 
-      const timestamp = new Date();
-      // await sequelize.query(
-      //   "select * from public.insert_message(:senderId,:receiverId,:message)",
-      //   {
-      //     replacements: {
-      //       senderId: senderId,
-      //       receiverId: receiverId,
-      //       message: message,
-      //     },
-      //   }
-      // );
+    const receiverSocketId = userSocketMap[receiverid];
 
-      const receiverSocketId = userSocketMap[receiverId];
-      console.log([userSocketMap[clientId], receiverSocketId]);
-
-      if (userSocketMap[clientId]) {
-        io.to([userSocketMap[clientId], receiverSocketId]).emit(
-          "receiveMessage",
-          {
-            senderId: senderId,
-            text: message,
-            timestamp: timestamp,
-            receiverId: receiverId,
-          }
-        );
-      } else {
-        console.log("Receiver not connected");
-      }
-      // io.to(userSocketMap[clientId]).emit("receiveMessage", {
-      //   senderId: senderId,
-      //   text: message,
-      //   timestamp: timestamp,
-      //   receiverId: receiverId,
-      // });
+    if (userSocketMap[clientId]) {
+      io.to([userSocketMap[clientId], receiverSocketId]).emit(
+        "receiveMessage",
+        {
+          senderid: senderid,
+          text: message,
+          timestamp: timestamp,
+          receiverid: receiverid,
+        }
+      );
+    } else {
+      console.log("Receiver not connected");
     }
-  );
+    // io.to(userSocketMap[clientId]).emit("receiveMessage", {
+    //   senderId: senderId,
+    //   text: message,
+    //   timestamp: timestamp,
+    //   receiverId: receiverId,
+    // });
+  });
 
   socket.on("joinGroup", (groupId) => {
     socket.join(groupId);
