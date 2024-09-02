@@ -46,7 +46,7 @@ cron.schedule("*/14 * * * *", () => {
 
   // Internal API call
   axios
-    .get("http://localhost:3000/")
+    .get("https://chat-app-api-cm2u.onrender.com/")
     .then((response) => {
       console.log("Response from internal API call:");
     })
