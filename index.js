@@ -6,6 +6,8 @@ import messageRouter from "./routes/messageRouter.js";
 import dotenv from "dotenv/config";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import axios from "axios";
+import cron from "node-cron";
 
 const index = express();
 const PORT = "8000";
@@ -35,6 +37,23 @@ index.use(express.json());
 //index.use("/api/user", studentRouter);
 index.use("/api/user", userRouter);
 index.use("/api/message", messageRouter);
+index.get("/", (req, res) => {
+  res.send("<h1>api calling</h1>");
+});
+
+cron.schedule("*/14 * * * *", () => {
+  console.log("Cron job running every 14 minutes");
+
+  // Internal API call
+  axios
+    .get("http://localhost:3000/")
+    .then((response) => {
+      console.log("Response from internal API call:");
+    })
+    .catch((error) => {
+      console.error("Error calling internal API:");
+    });
+});
 
 const userSocketMap = {};
 const userAudioMap = {};
@@ -43,7 +62,7 @@ io.on("connection", async (socket) => {
   const clientId = socket.handshake.query.id;
   userSocketMap[clientId] = socket.id;
 
-  socket.on("sendMessage", async ({ senderid, receiverid, message }) => {
+  socket.on("sendMessage", async ({ senderid, receiverid, message, img }) => {
     const timestamp = new Date();
     // await sequelize.query(
     //   "select * from public.insert_message(:senderId,:receiverId,:message)",
@@ -66,6 +85,7 @@ io.on("connection", async (socket) => {
           text: message,
           timestamp: timestamp,
           receiverid: receiverid,
+          img: img,
         }
       );
     } else {
