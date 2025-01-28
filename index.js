@@ -41,10 +41,9 @@ index.get("/", (req, res) => {
   res.send("<h1>api calling</h1>");
 });
 
-cron.schedule("*/10 * * * *", () => {
-  console.log("Cron job running every 14 minutes");
+cron.schedule("* * * * * *", () => {
+  console.log("Cron job running every 1 minutes");
 
-  // Internal API call
   axios
     .get("https://chat-app-api-cm2u.onrender.com/")
     .then((response) => {
