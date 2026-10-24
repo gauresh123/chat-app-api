@@ -41,18 +41,22 @@ index.get("/", (req, res) => {
   res.send("<h1>api calling</h1>");
 });
 
-// cron.schedule("* * * * * *", () => {
-//   console.log("Cron job running every 1 minutes");
 
-//   axios
-//     .get("https://chat-app-api-cm2u.onrender.com/")
-//     .then((response) => {
-//       console.log("Response from internal API call:");
-//     })
-//     .catch((error) => {
-//       console.error("Error calling internal API:");
-//     });
-// });
+cron.schedule("*/5 * * * *", () => {
+  console.log("Cron job running every 1 minutes");
+
+  axios
+    .get("https://chat-app-api-cm2u.onrender.com/")
+    .then((response) => {
+      index.get("/", (req, res) => {
+  res.send("<h1>api calling</h1>");
+});
+
+    })
+    .catch((error) => {
+      console.error("Error calling internal API:");
+    });
+});
 
 const userSocketMap = {};
 const userAudioMap = {};
