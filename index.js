@@ -30,13 +30,18 @@ const io = new Server(server, {
     origin: "*",
   },
 });
+const corsOptions = {
+  origin: [
+    "https://chat-app-ui-hs4h.onrender.com",
+    "http://localhost:3000",
+  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
-index.use(  cors({
-    origin: "https://chat-app-ui-hs4h.onrender.com",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+index.use(cors(corsOptions));
+index.options(/.*/, cors(corsOptions));
+
 index.use(express.json());
 
 //index.use("/api/user", studentRouter);
@@ -65,7 +70,6 @@ index.get("/", (req, res) => {
 
 const userSocketMap = {};
 const userAudioMap = {};
-
 io.on("connection", async (socket) => {
   const clientId = socket.handshake.query.id;
   userSocketMap[clientId] = socket.id;
@@ -175,3 +179,4 @@ sequelize
     res.write(JSON.stringify(info));
     res.end();
     }).listen(4500)*/
+export default index;
