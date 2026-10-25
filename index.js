@@ -31,7 +31,12 @@ const io = new Server(server, {
   },
 });
 
-index.use(cors());
+index.use(  cors({
+    origin: "https://chat-app-ui-hs4h.onrender.com",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 index.use(express.json());
 
 //index.use("/api/user", studentRouter);
